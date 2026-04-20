@@ -1,75 +1,372 @@
-<!-- wp:image {"id":45,"sizeSlug":"large","linkDestination":"none","className":"is-style-rounded"} -->
-<figure class="wp-block-image size-large is-style-rounded"><img src="https://daverezaba123-qghmk.wordpress.com/wp-content/uploads/2025/10/image_editor_output_image-2114367514-17610313795633610151855319212430.jpg?w=585" alt="" class="wp-image-45"/></figure>
-<!-- /wp:image -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Super Stickman Z - Galaxy Brawler</title>
+<style>
+  body { margin:0; background:#000; overflow:hidden; font-family: 'Segoe UI', sans-serif; color:white; }
+  canvas { display:block; margin:0 auto; border: 4px solid #333; box-shadow: 0 0 50px rgba(0,247,255,0.2); }
+  
+  /* Instruction Button Styles */
+  #ui-layer { position: absolute; top: 20px; width: 100%; pointer-events: none; }
+  #howToBtn { 
+    pointer-events: auto;
+    position: absolute; 
+    top: 10px; 
+    left: 50%; 
+    transform: translateX(-50%);
+    background: rgba(0, 247, 255, 0.2);
+    border: 2px solid #00f7ff;
+    color: #fff;
+    padding: 8px 15px;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 5px;
+    transition: 0.3s;
+    z-index: 100;
+  }
+  #howToBtn:hover { background: rgba(0, 247, 255, 0.5); box-shadow: 0 0 15px #00f7ff; }
 
-<!-- wp:paragraph {"align":"center","fontSize":"medium","style":{"typography":{"lineHeight":2}}} -->
-<p class="has-text-align-center has-medium-font-size" style="line-height:2"><strong>ABOUT ME</strong></p>
-<!-- /wp:paragraph -->
+  /* Instruction Modal */
+  #modal {
+    display: none;
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(10, 10, 30, 0.95);
+    border: 3px solid #00f7ff;
+    padding: 30px;
+    border-radius: 15px;
+    z-index: 200;
+    text-align: center;
+    box-shadow: 0 0 100px #000;
+  }
+</style>
+</head>
+<body>
 
-<!-- wp:paragraph {"align":"center","backgroundColor":"theme-5","textColor":"theme-2"} -->
-<p class="has-text-align-center has-theme-2-color has-theme-5-background-color has-text-color has-background">Motivated and results-driven Information<strong> </strong>Technology student with a strong foundational understanding of networking principles, operating systems (Windows/Linux), and hardware configuration. Eager to leverage classroom knowledge and practical project experience to contribute to a dynamic IT environment. Seeking an opportunity to develop hands-on skills in system administration and technical support.</p>
-<!-- /wp:paragraph -->
+<div id="ui-layer">
+    <button id="howToBtn" onclick="toggleInstructions()">INSTRUCTIONS</button>
+</div>
 
-<!-- wp:paragraph {"align":"center","fontSize":"large"} -->
-<p class="has-text-align-center has-large-font-size"><strong>SKILLS</strong></p>
-<!-- /wp:paragraph -->
+<div id="modal">
+    <h2 style="color:#00f7ff; margin-top:0;">GALAXY CONTROLS</h2>
+    <div style="display:flex; gap:40px; text-align:left;">
+        <div>
+            <h3 style="color:#00f7ff;">Player 1</h3>
+            <p>Move: <b>W, A, D</b></p>
+            <p>Punch: <b>F</b></p>
+            <p>Kick: <b>G</b></p>
+            <p>Special: <b>H</b></p>
+        </div>
+        <div style="border-left: 1px solid #333; padding-left:40px;">
+            <h3 style="color:#ff8000;">Player 2</h3>
+            <p>Move: <b>Arrows</b></p>
+            <p>Punch: <b>K</b></p>
+            <p>Kick: <b>L</b></p>
+            <p>Special: <b>;</b></p>
+        </div>
+    </div>
+    <button id="howToBtn" style="position:static; transform:none; margin-top:20px;" onclick="toggleInstructions()">CLOSE</button>
+</div>
 
-<!-- wp:image {"id":54,"sizeSlug":"large","linkDestination":"none","className":"is-style-default"} -->
-<figure class="wp-block-image size-large is-style-default"><img src="https://daverezaba123-qghmk.wordpress.com/wp-content/uploads/2025/10/img_20250904_1341521781745091978611341.jpg?w=1024" alt="" class="wp-image-54"/></figure>
-<!-- /wp:image -->
+<canvas id="game"></canvas>
 
-<!-- wp:image {"id":55,"sizeSlug":"large","linkDestination":"none","className":"is-style-default"} -->
-<figure class="wp-block-image size-large is-style-default"><img src="https://daverezaba123-qghmk.wordpress.com/wp-content/uploads/2025/10/img_20250924_1507045839965630756369857.jpg?w=1024" alt="" class="wp-image-55"/></figure>
-<!-- /wp:image -->
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+canvas.width = 1000;
+canvas.height = 500;
 
-<!-- wp:paragraph {"align":"center","backgroundColor":"theme-5","textColor":"theme-1"} -->
-<p class="has-text-align-center has-theme-1-color has-theme-5-background-color has-text-color has-background">T shirt Layout and YouTube Template Design for our MULTI MEDIA SYSTEMS, BSAB inspired color for an IT Department design hits different!</p>
-<!-- /wp:paragraph -->
+const gravity = 0.6;
+const friction = 0.8;
+const groundLevel = canvas.height - 60;
 
-<!-- wp:image {"id":21,"sizeSlug":"large","linkDestination":"none"} -->
-<figure class="wp-block-image size-large"><img src="https://daverezaba123-qghmk.wordpress.com/wp-content/uploads/2025/10/img_20250910_1442366977657314798524633.jpg?w=771" alt="" class="wp-image-21"/></figure>
-<!-- /wp:image -->
+let gameState = "start";
+const popups = [];
+const keys = {};
 
-<!-- wp:paragraph {"align":"center","backgroundColor":"theme-5","textColor":"theme-1"} -->
-<p class="has-text-align-center has-theme-1-color has-theme-5-background-color has-text-color has-background"><br />This is a Product Output in our MULTIMEDIA subject, first we created an product sample using Adobe Photoshop and then made the product personally.</p>
-<!-- /wp:paragraph -->
+function toggleInstructions() {
+    const modal = document.getElementById('modal');
+    modal.style.display = modal.style.display === 'block' ? 'none' : 'block';
+}
 
-<!-- wp:image {"id":22,"sizeSlug":"large","linkDestination":"none"} -->
-<figure class="wp-block-image size-large"><img src="https://daverezaba123-qghmk.wordpress.com/wp-content/uploads/2025/10/img_20251014_1134147351683056492932065.jpg?w=1024" alt="" class="wp-image-22"/></figure>
-<!-- /wp:image -->
+// Galaxy Background Logic
+const stars = [];
+for(let i = 0; i < 150; i++) {
+    stars.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        size: Math.random() * 2,
+        speed: Math.random() * 0.5 + 0.1,
+        opacity: Math.random()
+    });
+}
 
-<!-- wp:paragraph {"align":"center","backgroundColor":"theme-5","textColor":"theme-1"} -->
-<p class="has-text-align-center has-theme-1-color has-theme-5-background-color has-text-color has-background">PHP code that we practiced in our laboratory this code shows how to connect and display the output in real time using php my admin to database and you can search it by copying the URL in the browser</p>
-<!-- /wp:paragraph -->
+function drawGalaxy() {
+    let spaceGrad = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 50, canvas.width/2, canvas.height/2, 600);
+    spaceGrad.addColorStop(0, "#1a1a2e");
+    spaceGrad.addColorStop(1, "#000");
+    ctx.fillStyle = spaceGrad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-<!-- wp:image {"id":37,"sizeSlug":"large","linkDestination":"none"} -->
-<figure class="wp-block-image size-large"><img src="https://daverezaba123-qghmk.wordpress.com/wp-content/uploads/2025/10/image_editor_output_image1780041489-17610293932032936794629853507599.jpg?w=539" alt="" class="wp-image-37"/></figure>
-<!-- /wp:image -->
+    ctx.globalAlpha = 0.2;
+    ctx.fillStyle = "#4834d4";
+    ctx.beginPath();
+    ctx.arc(canvas.width * 0.3, canvas.height * 0.4, 200 + Math.sin(Date.now()*0.001)*20, 0, Math.PI*2);
+    ctx.fill();
+    ctx.globalAlpha = 1.0;
 
-<!-- wp:paragraph {"align":"center","backgroundColor":"theme-5","textColor":"theme-1"} -->
-<p class="has-text-align-center has-theme-1-color has-theme-5-background-color has-text-color has-background">HTML Project from our very beautiful and loving instructor "Miss Mercy" 🫶 if you visit this project you can click the links and it will bring you to my output samples.</p>
-<!-- /wp:paragraph -->
+    ctx.fillStyle = "white";
+    stars.forEach(s => {
+        s.x -= s.speed;
+        if(s.x < 0) s.x = canvas.width;
+        ctx.globalAlpha = s.opacity;
+        ctx.fillRect(s.x, s.y, s.size, s.size);
+    });
+    ctx.globalAlpha = 1.0;
+}
 
-<!-- wp:image {"id":25,"sizeSlug":"large","linkDestination":"none"} -->
-<figure class="wp-block-image size-large"><img src="https://daverezaba123-qghmk.wordpress.com/wp-content/uploads/2025/10/fb_img_16467307966414342928367721801311417410.jpg?w=576" alt="" class="wp-image-25"/><figcaption class="wp-element-caption">And of course My Cat Lemon 😁</figcaption></figure>
-<!-- /wp:image -->
+window.addEventListener("keydown", e => keys[e.key.toLowerCase()] = true);
+window.addEventListener("keyup", e => keys[e.key.toLowerCase()] = false);
 
-<!-- wp:heading {"level":5} -->
-<h5 class="wp-block-heading">PORTFOLIO IN CANVA<strong>&nbsp;</strong>&nbsp;&nbsp; <a href="https://www.canva.com/design/DAGvdbovqI4/u73NBZSDJmGhv8i1Y7YoFw/edit?utm_content=DAGvdbovqI4&amp;utm_campaign=designshare&amp;utm_medium=link2&amp;utm_source=sharebutton">click here</a></h5>
-<!-- /wp:heading -->
+class Player {
+  constructor(x, color, controls, name) {
+    this.name = name;
+    this.x = x;
+    this.y = groundLevel;
+    this.vx = 0;
+    this.vy = 0;
+    this.color = color;
+    this.controls = controls;
+    this.health = 100;
+    this.displayHealth = 100; // Used for smooth bar animation
+    this.facing = 1;
+    this.attackTimer = 0;
+    this.attackType = ""; 
+    this.specialCooldown = 0;
+    this.animTime = 0;
+    this.dead = false;
+    this.ragdoll = [];
+  }
 
-<!-- wp:paragraph -->
-<p></p>
-<!-- /wp:paragraph -->
+  update(opponent) {
+    if (this.dead) { this.updateRagdoll(); return; }
 
-<!-- wp:heading {"level":5} -->
-<h5 class="wp-block-heading">PORTFOLIO IN FIGMA <a href="https://www.figma.com/proto/eAmQpeF1KxF3NUIVF04yJP/Untitled?node-id=2-32&amp;starting-point-node-id=2%3A26&amp;t=cmKT7jcunyEAsmPc-1">clickhere</a></h5>
-<!-- /wp:heading -->
+    this.animTime += 0.15;
+    if (this.attackTimer > 0) this.attackTimer--;
+    if (this.specialCooldown > 0) this.specialCooldown--;
 
-<!-- wp:paragraph -->
-<p></p>
-<!-- /wp:paragraph -->
+    // Smooth Health Transition Logic
+    if (this.displayHealth > this.health) {
+        this.displayHealth -= 0.5;
+    }
 
-<!-- wp:heading {"level":5} -->
-<h5 class="wp-block-heading">E-COMMERCE IN FIGMA <a href="https://www.figma.com/design/pBy0n4gk14CFfs5cXbxADL/Untitled?node-id=0-1&amp;t=ANla11ipNHuYHCc1-1">click here</a></h5>
-<!-- /wp:heading -->
+    if (this.attackTimer <= 10) {
+      if (keys[this.controls.left]) this.vx -= 1.0;
+      if (keys[this.controls.right]) this.vx += 1.0;
+      if (keys[this.controls.jump] && this.y >= groundLevel) this.vy = -15;
+    }
+
+    this.vx *= friction;
+    this.vy += gravity;
+    this.x += this.vx;
+    this.y += this.vy;
+
+    if (this.y > groundLevel) { this.y = groundLevel; this.vy = 0; }
+    this.x = Math.max(30, Math.min(canvas.width - 30, this.x));
+    if (this.attackType !== "special") this.facing = opponent.x > this.x ? 1 : -1;
+
+    if (this.attackTimer <= 0) {
+      if (keys[this.controls.punch]) this.attack(opponent, "punch", 8, 15);
+      if (keys[this.controls.kick]) this.attack(opponent, "kick", 12, 25);
+      if (keys[this.controls.special] && this.specialCooldown <= 0) {
+        this.attack(opponent, "special", 35, 60);
+        this.specialCooldown = 400;
+      }
+    }
+  }
+
+  attack(opponent, type, dmg, duration) {
+    this.attackType = type;
+    this.attackTimer = duration;
+    if (type === "special") {
+        const startY = this.y - 45;
+        if (Math.abs(opponent.x - this.x) < 650 && this.facing === (opponent.x > this.x ? 1 : -1)) {
+            if (opponent.y > startY - 60 && opponent.y < startY + 60) opponent.takeHit(dmg, this.facing * 50);
+        }
+    } else {
+        let hitbox = { x: this.x + (this.facing * 40), y: type === "punch" ? this.y - 60 : this.y - 30, w: 45, h: 40 };
+        if (hitbox.x < opponent.x + 30 && hitbox.x + hitbox.w > opponent.x - 30 &&
+            hitbox.y < opponent.y && hitbox.y + hitbox.h > opponent.y - 80) {
+            opponent.takeHit(dmg, this.facing * (type === "kick" ? 30 : 15));
+        }
+    }
+  }
+
+  takeHit(dmg, force) {
+    this.health -= dmg;
+    this.vx += force * 0.15;
+    this.vy = -6;
+    popups.push(new Popup(this.x, this.y - 120, "-" + dmg, this.color));
+    if (this.health <= 0) this.die(force);
+  }
+
+  die(force) {
+    this.dead = true;
+    for (let i = 0; i < 8; i++) {
+      this.ragdoll.push({ x: this.x, y: this.y - i * 10, vx: (Math.random()-0.5)*8 + force*0.2, vy: -Math.random()*15 });
+    }
+  }
+
+  updateRagdoll() {
+    this.ragdoll.forEach(p => {
+      p.vy += gravity; p.x += p.vx; p.y += p.vy;
+      if (p.y > groundLevel) { p.y = groundLevel; p.vy *= -0.4; p.vx *= 0.8; }
+    });
+  }
+
+  draw() {
+    ctx.strokeStyle = this.color;
+    ctx.lineWidth = 7;
+    ctx.lineCap = "round";
+
+    if (this.dead) {
+      this.ragdoll.forEach(p => {
+        ctx.beginPath(); ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
+        ctx.fillStyle = this.color; ctx.fill();
+      });
+      return;
+    }
+
+    const headY = this.y - 80;
+    const bodyCenterY = this.y - 45;
+    const isAttacking = this.attackTimer > 0;
+
+    if (isAttacking && this.attackType === "special") {
+        ctx.save();
+        ctx.shadowBlur = 30; ctx.shadowColor = "white";
+        let grad = ctx.createLinearGradient(this.x, headY, this.x + (this.facing * 700), headY);
+        grad.addColorStop(0, "white"); grad.addColorStop(0.2, this.color); grad.addColorStop(1, "transparent");
+        ctx.fillStyle = grad;
+        let pulse = Math.sin(Date.now()*0.02) * 15;
+        ctx.beginPath(); ctx.ellipse(this.x + (this.facing * 350), bodyCenterY, 350, 30 + pulse, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+    }
+
+    ctx.fillStyle = this.color;
+    for (let i = 0; i < 5; i++) {
+        let hAngle = (i / 5) * Math.PI - Math.PI/2;
+        let jitter = Math.sin(this.animTime * 4 + i) * 6;
+        ctx.beginPath();
+        ctx.moveTo(this.x + Math.cos(hAngle) * 10, headY - 5);
+        ctx.lineTo(this.x + Math.cos(hAngle) * 30, headY - 35 + jitter);
+        ctx.lineTo(this.x + Math.cos(hAngle + 0.5) * 10, headY - 5);
+        ctx.fill();
+    }
+
+    ctx.beginPath(); ctx.arc(this.x, headY, 14, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(this.x, headY + 14); ctx.lineTo(this.x, bodyCenterY + 15); ctx.stroke();
+
+    const shoulderY = headY + 25;
+    if (isAttacking && this.attackType === "punch") {
+        ctx.beginPath(); ctx.moveTo(this.x, shoulderY);
+        ctx.lineTo(this.x + (this.facing * 60), shoulderY); ctx.stroke();
+    } else if (isAttacking && this.attackType === "special") {
+        ctx.beginPath(); ctx.moveTo(this.x, shoulderY);
+        ctx.lineTo(this.x + (this.facing * 40), bodyCenterY); ctx.stroke();
+    } else {
+        let armMotion = Math.sin(this.animTime) * 3;
+        ctx.beginPath(); ctx.moveTo(this.x, shoulderY); ctx.lineTo(this.x + (this.facing * 20), shoulderY + 15 + armMotion); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(this.x, shoulderY); ctx.lineTo(this.x - (this.facing * 15), shoulderY + 20); ctx.stroke();
+    }
+
+    const hipY = bodyCenterY + 15;
+    if (isAttacking && this.attackType === "kick") {
+        ctx.beginPath(); ctx.moveTo(this.x, hipY); ctx.lineTo(this.x + (this.facing * 60), hipY + 20); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(this.x, hipY); ctx.lineTo(this.x - (this.facing * 10), this.y); ctx.stroke();
+    } else {
+        let isMoving = Math.abs(this.vx) > 0.5;
+        let walk = isMoving ? Math.sin(this.animTime * 2) * 15 : 12;
+        ctx.beginPath(); ctx.moveTo(this.x, hipY); ctx.lineTo(this.x + walk, this.y); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(this.x, hipY); ctx.lineTo(this.x - walk, this.y); ctx.stroke();
+    }
+  }
+}
+
+class Popup {
+  constructor(x, y, text, color) { this.x = x; this.y = y; this.text = text; this.color = color; this.life = 60; }
+  update() { this.y -= 1.5; this.life--; }
+  draw() { ctx.globalAlpha = this.life / 60; ctx.fillStyle = this.color; ctx.font = "bold 28px Arial"; ctx.textAlign = "center"; ctx.fillText(this.text, this.x, this.y); ctx.globalAlpha = 1; }
+}
+
+const p1 = new Player(200, "#00f7ff", { left: "a", right: "d", jump: "w", punch: "f", kick: "g", special: "h" }, "CYAN SAIYAN");
+const p2 = new Player(800, "#ff8000", { left: "arrowleft", right: "arrowright", jump: "arrowup", punch: "k", kick: "l", special: ";" }, "GOLDEN BRAWLER");
+
+function drawUI() {
+    const drawAnimatedBar = (x, y, health, displayHealth, color, rightAlign) => {
+        ctx.fillStyle = "#222";
+        ctx.fillRect(x, y, 300, 30);
+        
+        // Ghost bar (white bar that trails behind)
+        ctx.fillStyle = "white";
+        if(rightAlign) ctx.fillRect(x + (300 - displayHealth * 3), y, displayHealth * 3, 30);
+        else ctx.fillRect(x, y, displayHealth * 3, 30);
+
+        // Actual health bar
+        ctx.fillStyle = color;
+        if(rightAlign) ctx.fillRect(x + (300 - health * 3), y, health * 3, 30);
+        else ctx.fillRect(x, y, health * 3, 30);
+
+        ctx.strokeStyle = "white";
+        ctx.lineWidth = 3;
+        ctx.strokeRect(x, y, 300, 30);
+    };
+
+    drawAnimatedBar(40, 40, p1.health, p1.displayHealth, p1.color, false);
+    drawAnimatedBar(canvas.width - 340, 40, p2.health, p2.displayHealth, p2.color, true);
+
+    // Special Cooldown Dots
+    ctx.fillStyle = p1.specialCooldown <= 0 ? p1.color : "#444";
+    ctx.beginPath(); ctx.arc(40, 85, 10, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = p2.specialCooldown <= 0 ? p2.color : "#444";
+    ctx.beginPath(); ctx.arc(canvas.width - 40, 85, 10, 0, Math.PI*2); ctx.fill();
+}
+
+function gameLoop() {
+  drawGalaxy();
+
+  if (gameState === "start") {
+    ctx.textAlign = "center"; ctx.fillStyle = "white"; ctx.font = "bold 70px Arial";
+    ctx.shadowBlur = 20; ctx.shadowColor = "cyan";
+    ctx.fillText("GALAXY BRAWLER Z", canvas.width/2, 200);
+    ctx.shadowBlur = 0; ctx.font = "24px Arial";
+    ctx.fillText("PRESS ENTER TO START", canvas.width/2, 270);
+    if (keys["enter"]) gameState = "play";
+  }
+
+  else if (gameState === "play") {
+    p1.update(p2); p2.update(p1);
+    p1.draw(); p2.draw();
+    drawUI();
+    popups.forEach((p, i) => { p.update(); p.draw(); if(p.life <=0) popups.splice(i, 1); });
+    if (p1.health <= 0 || p2.health <= 0) gameState = "gameover";
+  }
+
+  else if (gameState === "gameover") {
+    ctx.textAlign = "center";
+    ctx.fillStyle = p1.health > 0 ? p1.color : p2.color;
+    ctx.font = "bold 60px Arial";
+    ctx.fillText((p1.health > 0 ? "PLAYER 1" : "PLAYER 2") + " VICTORIOUS", canvas.width/2, 200);
+    ctx.fillStyle = "white"; ctx.font = "24px Arial";
+    ctx.fillText("PRESS R TO RESTART", canvas.width/2, 270);
+    if (keys["r"]) location.reload();
+  }
+
+  requestAnimationFrame(gameLoop);
+}
+
+gameLoop();
+</script>
+</body>
+</html>
